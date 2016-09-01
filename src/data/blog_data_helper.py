@@ -29,7 +29,6 @@ class BlogDataHelper():
         self.articles   = self.article_dao.get_articles()
         self.categories = self.category_dao.get_categories()
         for article in self.articles:
-            print article.article_id
             article_map_new[article.article_id] = article
 
         for category in self.categories:
@@ -50,9 +49,11 @@ class BlogDataHelper():
         self.category_map       = category_map_new
         self.category_type_map  = category_type_map_new
 
-        print self.article_map
-        print self.category_map
-        print self.category_type_map
+    def get_articles(self):
+        return self.articles
+
+    def get_categories(self):
+        return self.categories
 
     def get_article_by_article_id(self, article_id):
         return self.article_map[article_id]

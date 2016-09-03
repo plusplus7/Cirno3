@@ -1,0 +1,497 @@
+<html>
+    <head>
+        <title>plusplus7's homepage</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="keywords" content="plusplus7,+7,JackieDeng,plus,plus7,=+7"/>
+        <meta name="Author" content="plusplus7"/>
+        <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" /> 
+        <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" /> 
+        <link rel="stylesheet" type="text/css" href="/static/assets/css/screen.css?v=23c118cee3" />
+        <script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
+        <script charset="UTF-8">
+        var app = angular.module('AdminApp', []);
+        app.controller('AdminCtrl',
+                function($scope, $document, $http) {
+                    var request = {
+                            params: {
+                                'Action' : "ListCategories",
+                                'AccessKeyId' : 'plusplus7',
+                                'SignatureMethod':"HmacSHA256",
+                                'SignatureVersion':'1',
+                                'Timestamp':'20160706',
+                                "Version":"2016-06-12",
+                            }
+                        }
+                        $http.post("http://" + window.location.host + "/api/ListCategories", "", request).then(function successCallback(response){
+                            if (response["data"] != "") {
+                                $scope.categories = response["data"];
+                                
+                            } else {
+                                alert("Load categories Failed! " + response)
+                            }
+                        }, function errorCallback(response) {
+                            alert("Load categories Failed! " + response)
+                        });
+
+                    $scope.activeModule = 'AddPost';
+                    $scope.modules = {
+                        "AddPost": "active",
+                        "AddCategory": "",
+                        "ManagePost": "",
+                        "ManageCategory": "",
+                        "ManageAccount": ""
+                    };
+                    $scope.moduleOnclick = function(module) {
+                        $scope.modules[$scope.activeModule] = "";
+                        $scope.activeModule = module;
+                        $scope.modules[$scope.activeModule] = "active";
+                    };
+
+                    $scope.editMode = 'Light';
+                    $scope.editModes = {
+                        "Light": "active",
+                        "Raw": ""
+                    };
+                    $scope.articleId = "";
+                    $scope.lightShow = true;
+                    $scope.editModeOnclick = function(mode) {
+                        $scope.editModes[$scope.editMode] = "";
+                        $scope.editMode = mode;
+                        $scope.editModes[$scope.editMode] = "active";
+                        $scope.lightShow = mode == "Light";
+                        $scope.rawShow = mode == "Raw";
+                    };
+
+                    $scope.previewNotShow = true;
+                    $scope.previewPreviewShow = false;
+                    $scope.previewPostShow = false;
+
+                    $scope.previewPreviewOnClick = function() {
+                        if ($scope.lightShow) {
+                            document.getElementById('preview_preview_main').innerHTML = document.getElementById('previewContent').innerHTML;
+                        } else {
+                            document.getElementById('preview_preview_main').innerHTML = $scope.previewContent;
+                        }
+                        $scope.previewPreviewShow = true;
+                        $scope.previewNotShow = false;
+                    };
+                    $scope.postPreviewOnClick = function() {
+                        if ($scope.lightShow) {
+                            document.getElementById('preview_post_main').innerHTML = document.getElementById('postContent').innerHTML;
+                        } else {
+                            document.getElementById('preview_post_main').innerHTML = $scope.postContent;
+                        }
+                        $scope.previewPostShow = true;
+                        $scope.previewNotShow = false;
+                    };
+                    $scope.exitPreviewOnClick = function() {
+                        $scope.previewNotShow = true;
+                        $scope.previewPreviewShow = false;
+                        $scope.previewPostShow = false;
+                    }
+
+                    $scope.submitPostOnClick = function() {
+                        var ArticleId;
+                        var Preview;
+                        var Content;
+                        var Category;
+                        if ($scope.lightShow) {
+                            ArticleId   = $scope.articleId;
+                            Preview     = document.getElementById('previewContent').innerHTML;
+                            Content     = document.getElementById('postContent').innerHTML
+                            Category    = $scope.articleCategory;
+
+                        } else {
+                            ArticleId   = $scope.articleId
+                            Preview     = $scope.previewContent
+                            Content     = $scope.postContent
+                            Category    = $scope.articleCategory;
+                        }
+                        console.debug(Category);
+                        var request = {
+                            params: {
+                                'Action' : "CreateArticle",
+                                'AccessKeyId' : 'plusplus7',
+                                'SignatureMethod':"HmacSHA256",
+                                'SignatureVersion':'1',
+                                'Timestamp':'20160706',
+                                "Version":"2016-06-12",
+                                'ArticleId': ArticleId,
+                                'Category': Category,
+                                'Preview':Preview,
+                                'Content':Content
+                            }
+                        }
+                        $http.post("http://" + window.location.host + "/api/CreateArticle", "", request).then(function successCallback(response){
+                            if (response["data"] == "") {
+                                alert("Success!")
+                            } else {
+                                alert("Failed!" + response)
+                            }
+                        }, function errorCallback(response) {
+                            alert("Failed!" + response)
+                        });
+                    }
+
+                    $scope.submitCategoryOnClick = function () {
+                        var request = {
+                            params: {
+                                'Action' : "CreateCategory",
+                                'AccessKeyId' : 'plusplus7',
+                                'SignatureMethod':"HmacSHA256",
+                                'SignatureVersion':'1',
+                                'Timestamp':'20160706',
+                                "Version":"2016-06-12",
+                                'CategoryId': $scope.categoryId,
+                                'CategoryDisplayName': $scope.categoryDisplayName,
+                                'SectionId':$scope.categorySectionId,
+                                'Type':$scope.categoryType
+                            }
+                        }
+                        $http.post("http://" + window.location.host + "/api/CreateCategory", "", request).then(function successCallback(response){
+                            if (response["data"] == "") {
+                                alert("Success!")
+                            } else {
+                                alert("Failed!" + response)
+                            }
+                        }, function errorCallback(response) {
+                            alert("Failed!" + response)
+                        });
+                    }
+                    for (var category in $scope.categories) {
+                        $scope.articleCategory = category;
+                        break;
+                    }
+                    $scope.articleSectorId = "blog";
+                    $scope.categoryOnChange = function(category) {
+                        if ($scope.articleCategory in $scope.categories) {
+                            $scope.articleSectorId = $scope.categories[$scope.articleCategory]["sector"];
+                        } else {
+                            $scope.articleSectorId = "blog";
+                        }
+                    };
+                    $scope.articleTitle = "";
+                    $scope.arthorLink = "http://plusplus7.com";
+                    $scope.arthorName = "plusplus7";
+                    $scope.timeTag = new Date().toLocaleDateString().replace("/", ".").replace("/", ".");
+
+                    $scope.previewContent = document.getElementById('previewContent').innerHTML;
+                    $scope.postContent = document.getElementById('postContent').innerHTML;
+                });
+    </script>
+</head>
+
+<body class="home-template" ng-app="AdminApp" ng-controller="AdminCtrl">
+<header class="main-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1>plusplus7's blog</h1>
+                <h3>Life is tough, take it easy : )</h3></div>
+        </div>
+    </div>
+</header>
+<nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header">
+              <span class="nav-toggle-button collapsed" data-toggle="collapse" data-target="#main-menu">
+                <span class="sr-only">Toggle navigation</span>
+                <i class="fa fa-bars"></i>
+              </span>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu">
+                    <ul class="menu">
+                        <li role="presentation">
+                            <a href="/">回到主页</a></li>
+                        <li role="presentation" ng-hide="previewNotShow" ng-click="exitPreviewOnClick()">
+                            <a href="javascript:void(0)">退出预览</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="row" ng-show="previewNotShow">
+        <aside class="col-md-3 sidebar">
+            <div class="widget">
+                <h4 class="title">追忆の神殿</h4>
+                <div class="content community">
+                    <div class="list-group">
+                        <p>
+                            <a class="list-group-item {{ modules['AddPost'] }}" ng-click="moduleOnclick('AddPost')">添加文章</a></p>
+                        <p>
+                            <a class="list-group-item {{ modules['AddCategory'] }}" ng-click="moduleOnclick('AddCategory')">添加分类</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="widget">
+                <h4 class="title">圣光の灵</h4>
+                <div class="content community">
+                    <div class="list-group">
+                        <p>
+                            <a class="list-group-item {{ modules['ManagePost'] }}" ng-click="moduleOnclick('ManagePost')">管理文章</a></p>
+                        <p>
+                            <a class="list-group-item {{ modules['ManageCategory'] }}" ng-click="moduleOnclick('ManageCategory')">管理分类</a></p>
+                        <p>
+                            <a class="list-group-item {{ modules['ManageAccount'] }}" ng-click="moduleOnclick('ManageAccount')">管理账号</a></p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main id="main" class="col-md-9 main-content" ng-show="modules['AddPost']=='active'">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <ul class="nav nav-pills">
+                        <li role="presentation" class="{{ editModes['Light'] }}">
+                            <a ng-click="editModeOnclick('Light')">轻量模式</a></li>
+                        <li role="presentation" class="{{ editModes['Raw'] }}">
+                            <a ng-click="editModeOnclick('Raw')">源码模式</a></li>
+                    </ul>
+                    <form method="post">
+
+                        <div class="form-group" ng-show="lightShow">
+                            <label class="control-label" for="InputPostId">文章ID</label>
+                            <input class="form-control" name="postid" ng-model="articleId" />
+                        </div>
+
+                        <div class="form-group" ng-show="rawShow">
+                            <label class="control-label" for="InputPostId">文章ID</label>
+                            <div class="col-lg-12">
+                                <div class="input-group">
+                                    <input class="form-control" name="postid" ng-model="articleId" />
+                    <span class="input-group-btn" ng-show="rawShow">
+                      <a class="btn btn-default">读取文章</a>
+                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="previewContent" ng-hide="true">
+                            <article id="52" class="post tag-laravel-5-1 tag-artisan">
+                                <div class="post-head">
+                                    <h1 class="post-title">
+                                        <a href="/{{ articleSectorId }}/post/{{ articleId }}">{{ articleTitle }}</a></h1>
+                                    <div class="post-meta">
+                        <span class="author">作者：
+                          <a href="{{ arthorLink }}">{{ arthorName }}</a></span>•
+                                        <time class="post-date">{{ timeTag }}</time></div>
+                                </div>
+                                <div class="post-content">{{ previewPostContent }}</div>
+                                <div class="post-permalink">
+                                    <a href="/{{ articleSectorId }}/post/{{ articleId }}" class="btn btn-default">阅读全文</a></div>
+                            </article>
+                        </div>
+
+                        <div ng-show="lightShow">
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <label class="control-label" for="InputPostId">时间戳</label>
+                                    <input class="form-control" ng-model="timeTag" />
+                                    <label class="control-label" for="InputPostId">文章标题</label>
+                                    <input class="form-control" ng-model="articleTitle" /></div>
+                                <div class="form-group">
+                                    <label class="control-label" for="InputPostId">作者名</label>
+                                    <input class="form-control" ng-model="arthorName" />
+                                    <label class="control-label" for="InputPostId">作者链接</label>
+                                    <input class="form-control" ng-model="arthorLink" /></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="InputPostId">概览内容</label>
+                                <textarea class="form-control" rows="5" ng-model="previewPostContent"></textarea>
+                            </div>
+                        </div>
+                        <div ng-show="rawShow">
+                            <div class="form-group">
+                                <label class="control-label" for="inputPreview">文章概览</label>
+                                <textarea class="form-control" rows="2" name="preview" ng-model="previewContent">{{ previewContent }}</textarea></div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn" ng-click="previewPreviewOnClick()">预览</button></div>
+                        <div class="form-group">
+                            <label class="control-label" for="inputSuccess1">文章分类</label>
+                            <select class="form-control" ng-model="articleCategory" ng-change="categoryOnChange()">
+                                <option ng-repeat="(id, category) in categories" value="{{ id }}">{{ category[&quot;name&quot;] }}</option>
+                                <option value="NoArea">暂不添加分类</option></select>
+                        </div>
+                        <div id="postContent" ng-hide="true">
+                            <article id="52" class="post tag-laravel-5-1 tag-artisan">
+                                <div class="post-head">
+                                    <h1 class="post-title">
+                                        <a href="/{{ articleSectorId }}/post/{{ articleId }}">{{ articleTitle }}</a></h1>
+                                    <div class="post-meta">
+                        <span class="author">作者：
+                          <a href="{{ arthorLink }}">{{ arthorName }}</a></span>•
+                                        <time class="post-date">{{ timeTag }}</time></div>
+                                </div>
+                                <div class="post-content">{{ postPostContent }}</div></article>
+                        </div>
+
+                        <div ng-show="lightShow">
+                            <div class="form-group">
+                                <label class="control-label" for="InputPostId">正文内容</label>
+                                <textarea class="form-control" rows="5" ng-model="postPostContent"></textarea>
+                            </div>
+                        </div>
+                        <div ng-show="rawShow">
+                            <div class="form-group">
+                                <label class="control-label" for="inputPreview">文章正文</label>
+                                <textarea class="form-control" rows="2" name="preview" ng-model="postContent">{{ postContent }}</textarea></div>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn" ng-click="postPreviewOnClick()">预览</button></div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">身份验证码</label>
+                            <input type="password" class="form-control" name="password" id="exampleInputPassword1" placeholder="Password" /></div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-danger" ng-click="submitPostOnClick()">提交</button></div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        <main id="main" class="col-md-9 main-content" ng-show="modules['AddCategory']=='active'">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="control-label" for="InputAreaId">分类ID</label>
+                            <textarea class="form-control" rows="1" name="areaid" ng-model="categoryId"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="InputAreaName">分类名</label>
+                            <textarea class="form-control" rows="1" name="areaname" ng-model="categoryDisplayName"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="InputType">类型</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="type" id="section" value="common" ng-model="categoryType" checked>
+                                    普通分类
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="type" id="section" value="top" ng-model="categoryType">
+                                    分栏
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="type" id="section" value="side" ng-model="categoryType">
+                                    专栏
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="InputSection">分区</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="section" id="section" value="blog" ng-model="categorySectionId" checked>
+                                    博客区
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="section" id="section" value="game" ng-model="categorySectionId" >
+                                    游戏区
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">身份验证码</label>
+                            <input type="password" class="form-control" name="password" id="exampleInputPassword1" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-danger" ng-click="submitCategoryOnClick()">提交</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        <main id="main" class="col-md-9 main-content" ng-show="modules['ManagePost']=='active'">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <tr ng-repeat="(id, post) in articles">
+                            <td> {{ id }} </td>
+                            <td> {{ post['click'] }} </td>
+                            <td> <button type="submit" class="btn"> 编辑 </button> </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </main>
+        <main id="main" class="col-md-9 main-content" ng-show="modules['ManageCategory']=='active'">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div ng-repeat="(id, category) in categories">
+                        <div class="form-group">
+                            <input type="hidden" name="areaid" value="{{ id }}"/>
+                            <label for="exampleInputPassword1">分类名称</label>
+                            <input class="control-label" for="InputAreainfo" value='{{ category["name"] }}'>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">分类板块</label>
+                            <input class="control-label" for="InputAreainfo" ng-model='category["sector"]'>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">文章列表</label>
+                            <textarea class="form-control" rows="5" name="areainfo">{{ category["articles"] }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">身份验证码</label>
+                            <input type="password" class="form-control" name="password" id="exampleInputPassword1" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-danger">提交</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <main id="main" class="col-md-9 main-content" ng-show="modules['ManageAccount']=='active'">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    你以为我会开放账号管理功能？等我找到女朋友再说！
+                </div>
+            </div>
+        </main>
+
+    </div>
+    <div class="row" ng-show="previewPreviewShow">
+        <main class="col-md-8 main-content" id="preview_preview_main"></main>
+        <aside class="col-md-4 sidebar">
+            <div class="widget">
+                <h4 class="title">博客专栏</h4>
+                <div class="content community">
+                    <p><a href="/blog/area/233333">分栏{{i}}</a></p>
+                    <p><a href="/blog/area/233333">分栏{{i}}</a></p>
+                    <p><a href="/blog/area/233333">分栏{{i}}</a></p>
+                    <p><a href="/blog/area/233333">分栏{{i}}</a></p>
+                    <p><a href="/blog/area/233333">分栏{{i}}</a></p>
+                </div>
+            </div>
+            <div class="widget">
+                <h4 class="title">所有分类</h4>
+                <div class="content community">
+                    <p><a href="/blog/area/233333 }}">分类{{i}}</a></p>
+                    <p><a href="/blog/area/233333 }}">分类{{i}}</a></p>
+                    <p><a href="/blog/area/233333 }}">分类{{i}}</a></p>
+                    <p><a href="/blog/area/233333 }}">分类{{i}}</a></p>
+                    <p><a href="/blog/area/233333 }}">分类{{i}}</a></p>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <div class="row" ng-show="previewPostShow">
+        <main class="col-md-12 main-content" id="preview_post_main"></main>
+    </div>
+</div>
+
+</body>
+
+</html>
+

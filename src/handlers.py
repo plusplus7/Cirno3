@@ -62,3 +62,60 @@ class GameMainHandler(BaseHandler):
             article     = article,
             top_list    = self.db.get_category_by_category_type("game", "top"),
         )
+
+class ApiServerHandler(BaseHandler):
+    def initialize(self, db):
+        super(ApiServerHandler, self).initialize(db)
+        self.method_map = {
+            "ListCategories" : self.list_categories,
+            "CreateArticle"  : self.add_article,
+            "CreateCategory" : self.add_category,
+        }
+        self.basic_parameters = ["Action", "AccessKeyId", "SignatureMethod", "SignatureVersion", "Timestamp", "Version"]
+        self.parameter_map = {
+            "ListCategories"    : [],
+            "CreateArticle"     : ["ArticleId", "Category", "Preview", "Content"],
+            "CreateCategory"    : ["CategoryId", "CategoryDisplayName", "SectionId", "Type"],
+        }
+
+    def invoke_api(self, method):
+        context = {}
+        for param in self.basic_parameters:
+            res = self.get_arguments(param)
+            if len(res) == 0:
+                return (404, "MissingParameter.%s" % param)
+            context[param] = res[0]
+
+        if cmp(context["Action"], method) != 0:
+            return (403, "MethodNotAllowed.%s", context["Action"])
+
+        for param in self.parameter_map[method]:
+            res = self.get_arguments(param)
+            if len(res) == 0:
+                return (404, "MissingParameter.%s" % param)
+            context[param] = res[0]
+
+        self.method_map[method](context)
+
+    def add_article(self, context):
+        self.db.add_article(context["ArticleId"], context["Preview"], context["Content"])
+        self.db.attach_article_to_category(context["ArticleId"], context["Category"])
+        self.db.load()
+
+    def add_category(self, context):
+        self.db.add_category(context["CategoryId"], context["CategoryDisplayName"], context["SectionId"], context["Type"])
+        self.db.load()
+        pass
+
+    def list_categories(self, context):
+        self.write(self.db.get_categories_for_admin())
+
+    def post(self, method):
+        if method in self.method_map:
+            self.invoke_api(method)
+        else:
+            self.write(json.dumps({
+                "ErrorCode" : "404",
+                "ErrorMessage" : "Unknown method",
+                }
+            ))

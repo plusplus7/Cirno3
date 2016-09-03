@@ -18,22 +18,22 @@ connection = MySQLdb.connect(
 db = BlogDataHelper(connection)
 
 urls = [
-    (r'/', IndexHandler, dict(db=db)),
-    (r'/game', GameIndexHandler, dict(db=db)),
-    (r'/game/area/(?P<area_id>[a-zA-Z0-9-_]+)', GameIndexHandler, dict(db=db)),
-    (r'/game/post/(?P<post_id>[a-zA-Z0-9-_]+)', GameMainHandler, dict(db=db)),
-    (r'/blog', BlogIndexHandler, dict(db=db)),
-    (r'/blog/area/(?P<area_id>[a-zA-Z0-9-_]+)', BlogIndexHandler, dict(db=db)),
-    (r'/blog/post/(?P<post_id>[a-zA-Z0-9-_]+)', BlogMainHandler, dict(db=db)),
-    (r"/storage", tornado.web.RedirectHandler, {"url": "/blog/post/storage"}),
-    (r"/donation", tornado.web.RedirectHandler, {"url": "/blog/post/donation"}),
-    (r"/aboutme", tornado.web.RedirectHandler, {"url": "/blog/post/aboutme"}),
+    (r'/',                                      IndexHandler,                   dict(db=db)),
+    (r'/game',                                  GameIndexHandler,               dict(db=db)),
+    (r'/game/area/(?P<area_id>[a-zA-Z0-9-_]+)', GameIndexHandler,               dict(db=db)),
+    (r'/game/post/(?P<post_id>[a-zA-Z0-9-_]+)', GameMainHandler,                dict(db=db)),
+    (r'/blog',                                  BlogIndexHandler,               dict(db=db)),
+    (r'/blog/area/(?P<area_id>[a-zA-Z0-9-_]+)', BlogIndexHandler,               dict(db=db)),
+    (r'/blog/post/(?P<post_id>[a-zA-Z0-9-_]+)', BlogMainHandler,                dict(db=db)),
+    (r"/storage",                               tornado.web.RedirectHandler,    {"url": "/blog/post/storage"}),
+    (r"/donation",                              tornado.web.RedirectHandler,    {"url": "/blog/post/donation"}),
+    (r"/aboutme",                               tornado.web.RedirectHandler,    {"url": "/blog/post/aboutme"}),
 ]
 
 settings = {
     "static_path"   : os.path.join(os.path.dirname(__file__), "static"),
     "template_path" : os.path.join(os.path.dirname(__file__), "templates"),
-    "debug"         : False,
+    "debug"         : True,
     "gzip"          : True,
 }
 

@@ -4,8 +4,10 @@ class BaseDao():
         self.conn = connection
 
     def open(self):
-        self.cursor = self.conn.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+        return self.conn.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 
-    def close(self):
-        self.cursor.close()
+    def close(self, cursor):
+        cursor.close()
 
+    def commit(self):
+        self.conn.commit()

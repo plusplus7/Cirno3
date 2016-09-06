@@ -9,9 +9,7 @@
         background-color: #000000;
         overflow: hidden;
     }</style>
-    <script src="http://threejs.org/build/three.min.js"></script>
-    <script src="http://threejs.org/examples/js/libs/stats.min.js"></script>
-    <script src="http://threejs.org/examples/fonts/helvetiker_regular.typeface.js"></script>
+    <script src="/static/mysterious_space/three.min.js"></script>
     <script>
         var scene,camera,renderer,light,mazeh,mazew,maze;
         var KEY_A=65,PRESS_A;
@@ -27,6 +25,34 @@
 
             renderer.setSize( window.innerWidth, window.innerHeight );
 
+        }
+
+        var text = undefined;
+        function loadFont(x, y, z) {
+          var loader = new THREE.FontLoader();
+
+          loader.load( '/static/mysterious_space/helvetiker_regular.typeface.json', function ( response ) {
+              font = response;
+              text3d = new THREE.TextGeometry( "E", {
+                  font : font,
+                  size: 40,
+                  height: 10,
+                  curveSegments: 40,
+
+                  material: 0,
+                  extrudeMaterial: 1
+              });
+              var textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, overdraw: true } );
+              text = new THREE.Mesh( text3d, textMaterial );
+              text.position.x = x;
+              text.position.z = z;
+              text.rotation.y = y;
+
+              group = new THREE.Object3D();
+              group.add( text );
+
+              scene.add( group );
+          });
         }
         function initGame()
         {
@@ -51,18 +77,8 @@
                         "*..*.*",
                         "*....*",
                         "******"];
-            BoxTexture = THREE.ImageUtils.loadTexture( "images/crate.gif" );
+            BoxTexture =  new THREE.TextureLoader().load( "images/crate.gif" );
             BoxMaterial = new THREE.MeshBasicMaterial( { map: BoxTexture } );
-            var text3d = new THREE.TextGeometry( "E", {
-
-                size: 40,
-                height: 10,
-                curveSegments: 40,
-
-
-            });
-            var textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, overdraw: true } );
-            text = new THREE.Mesh( text3d, textMaterial );
 
             var LineMaterial = new THREE.LineBasicMaterial({
                 color: 0x0000ff
@@ -88,13 +104,14 @@
                 var line = new THREE.Line( geometry, LineMaterial );
                 scene.add( line );
             }
+            var mesh = new THREE.BoxGeometry( 50, 50, 50 )
             for (i=0; i<mazeh; i++)
             {
                 for (j=0; j<mazew; j++)
                 {
                     if (maze[i][j] == '*')
                     {
-                        Box = new THREE.Mesh(new THREE.BoxGeometry( 50, 50, 50 ),BoxMaterial);
+                        Box = new THREE.Mesh(mesh,BoxMaterial);
                         Box.position.x=25+i*50;
                         Box.position.y=25;
                         Box.position.z=25+j*50;
@@ -107,19 +124,7 @@
                     }
                     if (maze[i][j] == 'E')
                     {
-
-
-
-
-                        text.position.x = 25+i*50;
-                        text.position.z = 25+j*50;
-
-                        text.rotation.y = Math.PI * 2;
-
-                        group = new THREE.Object3D();
-                        group.add( text );
-
-                        scene.add( group );
+                      loadFont(25+i*50,  Math.PI * 2, 25+j*50);
                     }
                 }
             }
@@ -181,7 +186,6 @@
         var loop=0;
         function checkPass()
         {
-            //console.info(camera.position.x+" "+camera.position.z+" "+getMazeType());
 
             if (getMazeType() == 'E')
             {
@@ -210,7 +214,9 @@
                 camera.position.x-=tx;
                 camera.position.z-=tz;
             }
-            text.rotation.y+=0.1;
+            if (text != undefined) {
+              text.rotation.y+=0.1;
+            }
             checkPass();
             renderer.render( scene, camera );
         }

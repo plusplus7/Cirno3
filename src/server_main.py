@@ -25,6 +25,7 @@ urls = [
     (r'/blog',                                  BlogIndexHandler,               dict(db=db)),
     (r'/blog/area/(?P<area_id>[a-zA-Z0-9-_]+)', BlogIndexHandler,               dict(db=db)),
     (r'/blog/post/(?P<post_id>[a-zA-Z0-9-_]+)', BlogMainHandler,                dict(db=db)),
+    (r'/api/(?P<method>[a-zA-Z0-9-_]+)',        ApiServerHandler,               dict(db=db)),
     (r"/storage",                               tornado.web.RedirectHandler,    {"url": "/blog/post/storage"}),
     (r"/donation",                              tornado.web.RedirectHandler,    {"url": "/blog/post/donation"}),
     (r"/aboutme",                               tornado.web.RedirectHandler,    {"url": "/blog/post/aboutme"}),

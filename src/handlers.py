@@ -70,12 +70,14 @@ class ApiServerHandler(BaseHandler):
             "ListCategories" : self.list_categories,
             "CreateArticle"  : self.add_article,
             "CreateCategory" : self.add_category,
+            "AttachArticleToCategory" : self.attach_article_to_category,
         }
-        self.basic_parameters = ["Action", "AccessKeyId", "SignatureMethod", "SignatureVersion", "Timestamp", "Version"]
+        self.basic_parameters = ["Action", "Key", "Signature", "Timestamp", "Version"]
         self.parameter_map = {
             "ListCategories"    : [],
-            "CreateArticle"     : ["ArticleId", "Category", "Preview", "Content"],
-            "CreateCategory"    : ["CategoryId", "CategoryDisplayName", "SectionId", "Type"],
+            "CreateArticle"     : ["ArticleId", "CategoryId", "Preview", "Content"],
+            "CreateCategory"    : ["CategoryId", "DisplayName", "SectionId", "Type"],
+            "AttachArticleToCategory" : ["ArticleId", "CategoryId"],
         }
 
     def invoke_api(self, method):
@@ -95,27 +97,45 @@ class ApiServerHandler(BaseHandler):
                 return (404, "MissingParameter.%s" % param)
             context[param] = res[0]
 
-        self.method_map[method](context)
+        result = None
+        try:
+            result = self.method_map[method](context)
+        except Exception as e:
+            print e
+            return (500, "Internal error")
+        return result
+
 
     def add_article(self, context):
         self.db.add_article(context["ArticleId"], context["Preview"], context["Content"])
-        self.db.attach_article_to_category(context["ArticleId"], context["Category"])
         self.db.load()
+        return (200, "")
+
+    def attach_article_to_category(self, context):
+        self.db.attach_article_to_category(context["ArticleId"], context["CategoryId"])
+        self.db.load()
+        return (200, "")
 
     def add_category(self, context):
-        self.db.add_category(context["CategoryId"], context["CategoryDisplayName"], context["SectionId"], context["Type"])
+        self.db.add_category(context["CategoryId"], context["DisplayName"], context["SectionId"], context["Type"])
         self.db.load()
-        pass
+        return (200, "")
 
     def list_categories(self, context):
-        self.write(self.db.get_categories_for_admin())
+        return (200, self.db.get_categories_for_admin())
 
     def post(self, method):
         if method in self.method_map:
-            self.invoke_api(method)
+            result = self.invoke_api(method)
         else:
-            self.write(json.dumps({
-                "ErrorCode" : "404",
-                "ErrorMessage" : "Unknown method",
-                }
-            ))
+            result = ("404", "Unknown method")
+
+        print json.dumps({
+            "Code"      : result[0],
+            "Message"   : result[1],
+        })
+        self.write(json.dumps({
+            "Code"      : result[0],
+            "Message"   : result[1],
+        }))
+        self.finish()

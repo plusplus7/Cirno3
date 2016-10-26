@@ -1,5 +1,6 @@
 from base_dao import BaseDao
 from category import Category
+
 class CategoryDao(BaseDao):
     def get_categories(self):
         sql = 'select * from category'

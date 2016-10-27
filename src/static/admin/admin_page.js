@@ -72,42 +72,32 @@ app.controller('AdminCtrl',
             var ArticleId;
             var Preview;
             var Content;
-            var Category;
+            var CategoryId;
             if ($scope.lightShow) {
                 ArticleId   = $scope.articleId;
                 Preview     = document.getElementById('previewContent').innerHTML;
                 Content     = document.getElementById('postContent').innerHTML
-                Category    = $scope.articleCategory;
+                CategoryId  = $scope.articleCategory;
 
             } else {
                 ArticleId   = $scope.articleId
                 Preview     = $scope.previewContent
                 Content     = $scope.postContent
-                Category    = $scope.articleCategory;
+                CategoryId  = $scope.articleCategory;
             }
-            console.debug(Category);
-            var request = {
-                params: {
-                    'Action' : "CreateArticle",
-                    'AccessKeyId' : 'plusplus7',
-                    'SignatureMethod':"HmacSHA256",
-                    'SignatureVersion':'1',
-                    'Timestamp':'20160706',
-                    "Version":"2016-06-12",
-                    'ArticleId': ArticleId,
-                    'Category': Category,
-                    'Preview':Preview,
-                    'Content':Content
-                }
-            }
-            $http.post("http://" + window.location.host + "/api/CreateArticle", "", request).then(function successCallback(response){
-                if (response["data"] == "") {
+            api.CreateArticle(ArticleId, Preview, Content).then(function successCallback(response){
+                if (response.Code == 200) {
                     alert("Success!")
                 } else {
                     alert("Failed!" + response)
                 }
-            }, function errorCallback(response) {
-                alert("Failed!" + response)
+            });
+            api.AttachArticleToCategory(ArticleId, CategoryId).then(function successCallback(response){
+                if (response.Code == 200) {
+                    alert("Success!")
+                } else {
+                    alert("Failed!" + response)
+                }
             });
         }
 

@@ -27,7 +27,7 @@ app.factory('api', function($http, $httpParamSerializer) {
         sign : function(params) {
             return "";
         },
-        CreateArticle : function(articleId, categoryId, preview, content) {
+        CreateArticle : function(articleId, preview, content) {
             var params = {
                 "Action"        : "CreateArticle",
                 "Timestamp"      : new Date().getTime(),
@@ -35,7 +35,6 @@ app.factory('api', function($http, $httpParamSerializer) {
                 "Version"       : "1.0",
                 "Signature"     : "",
                 "ArticleId"     : articleId,
-                "CategoryId"    : categoryId,
                 "Preview"       : preview,
                 "Content"       : content
             };

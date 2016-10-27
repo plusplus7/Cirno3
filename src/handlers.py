@@ -75,7 +75,7 @@ class ApiServerHandler(BaseHandler):
         self.basic_parameters = ["Action", "Key", "Signature", "Timestamp", "Version"]
         self.parameter_map = {
             "ListCategories"    : [],
-            "CreateArticle"     : ["ArticleId", "CategoryId", "Preview", "Content"],
+            "CreateArticle"     : ["ArticleId", "Preview", "Content"],
             "CreateCategory"    : ["CategoryId", "DisplayName", "SectionId", "Type"],
             "AttachArticleToCategory" : ["ArticleId", "CategoryId"],
         }
